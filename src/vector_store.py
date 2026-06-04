@@ -1,8 +1,7 @@
 import os
-import uuid
-
 import chromadb
 
+from src.utils.hash_generator import generate_content_hash,generate_doc_id
 
 class VectorStore:
 
@@ -15,7 +14,6 @@ class VectorStore:
 
     
     def _init_store(self):
-
         try:
             os.makedirs(self.persist_directory,exist_ok=True)
             self.client=chromadb.PersistentClient(path=self.persist_directory)
@@ -28,8 +26,81 @@ class VectorStore:
         except Exception as e:
             print(f"Error initializing vector store :{e}")
             raise e
+   
+    def incremental_add_docs(self,documents,embeddings,file_hash:str):
+        if len(documents)!=len(embeddings):
+            raise ValueError('No:of documents must match embeddings')
+        
+        existing=self.collection.get(
+            where={"file_hash":file_hash},
+            include=["metadatas"]
+        )
+        existing_map={}
+
+        for doc_id,meta in zip(existing.get('ids',[]),existing.get('metadatas',[])):
+            existing_map[meta.get('chunk_index')]={
+                'id':doc_id,
+                'chunk_hash':meta.get('chunk_hash')
+            }
+        
+        ids=[]
+        docs=[]
+        embeds=[]
+        metas=[]
+
+        up_ids,up_docs,up_embeds,up_metas=[],[],[],[]
+
+        for index,(doc,embedding)in enumerate(zip(documents,embeddings)):
+            chunk_text=doc.page_content
+            chunk_hash=generate_content_hash(chunk_text)
+            doc_id=generate_doc_id(file_hash,index)
+            
+            metadata=dict(doc.metadata)
+            metadata.update({
+                "file_hash":file_hash,
+                "chunk_index":index,
+                "chunk_hash":chunk_hash,
+                "content_length":len(chunk_text)
+            })
+
+            if index not in existing_map:
+                ids.append(doc_id)
+                docs.append(chunk_text)
+                embeds.append(embedding.tolist())
+                metas.append(metadata)
+            
+            else:
+                old_hash=existing_map[index]['chunk_hash']
+
+                if old_hash!=chunk_hash:
+                    up_ids.append(old_hash)
+                    up_docs.append(chunk_text)
+                    up_embeds.append(embedding.tolist())
+                    up_metas.append(metadata)
+        
+        if ids:
+            self.collection.add(
+                ids=ids,
+                documents=docs,
+                embeddings=embeds,
+                metadatas=metas
+            )
+        if up_ids:
+            self.collection.update(
+                ids=up_ids,
+                documents=up_docs,
+                embeddings=up_embeds,
+                metadatas=up_metas
+            )
+        print("\nSummary\n")
+        print(f"Added: {len(ids)}")
+        print(f"Updated: {len(up_ids)}")
+        print(f"Skipped: {len(documents)-len(ids)-len(up_ids)}")
+
+
     
-    def add_documents(self, documents, embeddings):
+     ### ========================Outdated======================================= ####
+    '''def add_documents(self, documents, embeddings,file_hash:str):
 
         if len(documents) != len(embeddings):
             raise ValueError("Number of documents must match number of embeddings")
@@ -45,6 +116,7 @@ class VectorStore:
             ids.append(doc_id)
 
             metadata = dict(doc.metadata)
+            metadata['file_hash']=file_hash
             metadata["doc_index"] = i
             metadata["content_length"] = len(doc.page_content)
             metadatas.append(metadata)
@@ -66,4 +138,5 @@ class VectorStore:
 
         except Exception as e:
             print(f"Error adding documents to vector store: {e}")
-            raise
+            raise'''
+### ============================================================================== ####
