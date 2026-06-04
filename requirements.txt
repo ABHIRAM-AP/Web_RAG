@@ -1,0 +1,7 @@
+langchain 
+langchain-community
+langchain_google_genai
+langgraph
+sentence-transformers
+chromadb
+faiss-cpu
