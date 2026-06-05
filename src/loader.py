@@ -7,7 +7,6 @@ class EmbeddingsManager:
     self._model_name=model_name
     self._model=None
     self._load_model()
-
   def _load_model(self):
     try:
       print(f"Loading embedding model: {self._model_name}")
@@ -15,7 +14,6 @@ class EmbeddingsManager:
     except Exception as e:
       print(f"Failed to load embedding model: {self._model_name}")
       raise e
-
   def generate_embeddings(self,texts:List[str]) ->np.ndarray:
     if not self._model:
       raise ValueError("Embedding Model Not Loaded")

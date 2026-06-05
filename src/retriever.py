@@ -1,5 +1,5 @@
-from vector_store import VectorStore
-from loader import EmbeddingsManager
+from src.vector_store import VectorStore
+from src.loader import EmbeddingsManager
 from typing import List,Dict,Any
 
 class RAGRetriever:
