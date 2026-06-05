@@ -73,7 +73,7 @@ class VectorStore:
                 old_hash=existing_map[index]['chunk_hash']
 
                 if old_hash!=chunk_hash:
-                    up_ids.append(old_hash)
+                    up_ids.append(existing_map[index]['id'])
                     up_docs.append(chunk_text)
                     up_embeds.append(embedding.tolist())
                     up_metas.append(metadata)
@@ -99,7 +99,7 @@ class VectorStore:
 
 
     
-     ### ========================Outdated======================================= ####
+### ========================Outdated======================================= ####
     '''def add_documents(self, documents, embeddings,file_hash:str):
 
         if len(documents) != len(embeddings):
