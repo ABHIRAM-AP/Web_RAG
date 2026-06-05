@@ -1,13 +1,11 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+from src.vector_store import VectorStore
+from src.loader import EmbeddingsManager
 from typing import List,Dict,Any
 import os
 from dotenv import load_dotenv
 
-from src.loader import EmbeddingsManager
-from src.vector_store import VectorStore
-
 load_dotenv()
-
 
 class RAGRetriever:
 
