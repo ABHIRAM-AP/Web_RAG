@@ -1,17 +1,22 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-from src.vector_store import VectorStore
-from src.loader import EmbeddingsManager
 from typing import List,Dict,Any
 import os
 from dotenv import load_dotenv
 
+from src.loader import EmbeddingsManager
+from src.vector_store import VectorStore
+
 load_dotenv()
+
 
 class RAGRetriever:
 
     def __init__(self,vector_store:VectorStore,embeddings_manager:EmbeddingsManager,top_k:int=5,score_threshold:float=0.0,):
         self.vector_store=vector_store
         self.embeddings_manager=embeddings_manager
+        self.top_k=top_k
+        self.score_threshold=score_threshold
+        self.llm=ChatGoogleGenerativeAI(model='gemini-2.5-flash',api_key=os.getenv('GOOGLE_API_KEY'))
 
 
     def _retrieve(
@@ -64,23 +69,31 @@ class RAGRetriever:
             return []
     
     def generate_response(self,query:str):
-        GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY')
-        llm=ChatGoogleGenerativeAI(model='gemini-2.5-flash',api_key=GOOGLE_API_KEY)
+       
         results = self._retrieve(query=query)
         print('='*10)
         print(results)
         print('='*10)
-        context="\n\n".join([doc['content'] for doc in results]) if results else ""
+        context="\n\n".join([f"Source: {doc['metadata']} \n{doc['content']}" for doc in results]) if results else ""
         if not context:
             return f"No relevant information to the query provided"
         
             # Generate the answer
-        prompt=f"""Use the following context to answer the questions concisely
-            Context:
-            {context}
-            Question: {query}
-            Answer:
-            """
+        prompt = f"""
+        You are a helpful RAG assistant.
 
-        response = llm.invoke(prompt)
+        Answer ONLY from the provided context.
+        If the answer is not present in the context, say:
+        "I couldn't find that information in the knowledge base."
+
+        Context:
+        {context}
+
+        Question:
+        {query}
+
+        Answer:
+        """
+
+        response = self.llm.invoke(prompt)
         return response.content
