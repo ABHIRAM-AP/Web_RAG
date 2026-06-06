@@ -39,6 +39,7 @@ def web_search(query:str,max_results:int=5) -> str:
                 Title: {r['name']}
                 URL: {r['url']}
                 Summary: {r.get('summary','')}
+
             """
         )
         return "\n\n".join(formatted)
