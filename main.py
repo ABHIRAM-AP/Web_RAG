@@ -47,3 +47,4 @@ rag_retriever=RAGRetriever(vector_store=vectorstore,embeddings_manager=embedding
 final_answer = rag_retriever.generate_response(question)
 
 print(final_answer)
+
