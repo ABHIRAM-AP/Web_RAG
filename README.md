@@ -109,8 +109,8 @@ ollama pull qwen2.5:3b
 Create a `.env` file in the project root:
 
 ```env
-# Required only if using the web_search tool (tools.py)
-LANGSEARCH_API_KEY=your_langsearch_api_key_here
+# Required only if using the Google Gemini
+GOOGLE_API_KEY=your_google_api_key_here
 ```
 
 ### 5. Run
@@ -187,12 +187,8 @@ This makes re-indexing fast and idempotent.
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to open a [GitHub Issue](https://github.com/ABHIRAM-AP/Web_RAG/issues) or submit a pull request.
 
----
 
-## 📄 License
-
-This project is open source. Add a `LICENSE` file to specify terms.
