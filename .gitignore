@@ -5,3 +5,5 @@ src/__pycache__/
 *.pyo
 src/__pycache__/loader.cpython-313.pyc
 src/__pycache__/vector_store.cpython-313.pyc
+
+tools.py
