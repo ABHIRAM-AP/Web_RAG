@@ -42,7 +42,7 @@ for doc in docs:
         file_hash
     )
 
-question = "Summarize the RAG page of Google Cloud in 3 bullet points using only the indexed source."
+question = input("Enter your question")
 rag_retriever=RAGRetriever(vector_store=vectorstore,embeddings_manager=embedding_manager)
 final_answer = rag_retriever.generate_response(question)
 
